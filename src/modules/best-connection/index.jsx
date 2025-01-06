@@ -530,9 +530,10 @@ const BestConnection = ({ global: { user } }, data = undefined, onClose) => {
   );
 
   const showModalNewLocation = async () => {
+    console.log("open countries");
     setShowPopup(true);
-    setSelectedLocation({});
-    setSelectedBestConnection([]);
+    // setSelectedLocation({});
+    // setSelectedBestConnection([]);
   };
 
   const closeModal = () => {
@@ -540,7 +541,28 @@ const BestConnection = ({ global: { user } }, data = undefined, onClose) => {
   };
 
   const handleSelectLocation = (location) => {
-    setSelectedLocation(location);
+
+    //  check if location is already selected
+    const isExist = selectedCountries.some(
+      (item) => item.locationId === location.locationId
+    );
+
+    if (isExist) {
+      notification.error({
+        description: `Location ${location.location} is already selected.`,
+        placement: "bottomRight",
+        duration: 2,
+        icon: "",
+        className: "core-notification error",
+      });
+      return;
+    }
+
+
+
+    setSelectedCountries((prev) => {
+      return [...prev, location];
+    });
 
     if (!location.locationId) {
       setSelectedBestConnection([]);
@@ -559,6 +581,8 @@ const BestConnection = ({ global: { user } }, data = undefined, onClose) => {
       }
       return prev;
     });
+
+    console.log("selectedLocation", selectedLocation);
 
     closeModal();
   };

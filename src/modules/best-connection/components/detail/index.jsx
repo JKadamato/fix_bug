@@ -72,8 +72,20 @@ export const NewLocation = ({
     setFilteredCountries(filtered);
   };
 
-  const handleSelectLocation = (value, iso2) => {
-    onSelectLocation({ name: value, iso2 });
+  const handleSelectLocation = (item) => {
+    const location = item.name;
+    const locationId = item.id;
+    const priority = item.priority || "cpu";
+    const enabled = true;
+    const bestConnections = [location];
+    const srcImg = item?.iso2;
+
+
+
+
+
+    onSelectLocation({ location, locationId, bestConnections, priority, enabled , srcImg});
+
     closeModal();
   };
 
@@ -118,7 +130,7 @@ export const NewLocation = ({
             <div
               key={item?.id}
               className="country-item p-2 border-b cursor-pointer flex items-center"
-              onClick={() => handleSelectLocation(item?.name, item?.iso2)}
+              onClick={() => handleSelectLocation(item)}
             >
               <img
                 className="rounded-full mr-2"
