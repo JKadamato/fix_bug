@@ -176,6 +176,13 @@ const BestConnection = ({ global: { user } }, data = undefined, onClose) => {
   const [totalPages, setTotalPages] = useState(0);
   const itemsPerPage = 10;
 
+  const [newItem, setNewItem] = useState({
+    status: false,
+    locationId: "",
+    newConnections: [],
+    priority: "",
+  });
+
   useEffect(() => {
     fetchBestCountryList();
   }, [currentPage, searchValue, selectedPriority]);
@@ -282,25 +289,29 @@ const BestConnection = ({ global: { user } }, data = undefined, onClose) => {
     }
   };
 
+  // console.log(countries);
+
   // call API to create and update best connection
   const handleConfirmSave = async () => {
-    setSaveModal(false);
-
     const selectedCountry = countries.find(
-      (country) => country.name === selectedLocation?.name
+      (country) => country.id === newItem?.locationId
     );
+
+    console.log("selectedCountry", selectedCountry);
 
     if (!selectedCountry) {
       console.error("Không tìm thấy quốc gia đã chọn.");
       return;
     }
 
-    const selectedPriority = selectedLocation?.priority || "N/A";
+    const selectedPriority = newItem?.priority || "N/A";
+
+    // const selectedPriority = selectedCountry.map();
 
     const requestBody = {
       adminId: user?.id,
-      countryId: selectedCountry.id,
-      countryAround: selectedBestConnection.map(
+      countryId: newItem.locationId,
+      countryAround: newItem.newConnections.map(
         (connection) =>
           countries.find((country) => country.name === connection)?.id
       ),
@@ -338,11 +349,19 @@ const BestConnection = ({ global: { user } }, data = undefined, onClose) => {
         className: "core-notification error",
       });
     }
+
+    setSaveModal(false);
   };
 
   // call API to update priority
   const handlePriorityChange = async (locationId, newPriority) => {
     setLoadingPriorities((prev) => ({ ...prev, [locationId]: true }));
+
+    setNewItem((prev) => ({
+      ...prev,
+      priority: newPriority,
+    }));
+
     try {
       const selectedCountry = selectedCountries.find(
         (country) => country.locationId === locationId
@@ -530,10 +549,9 @@ const BestConnection = ({ global: { user } }, data = undefined, onClose) => {
   );
 
   const showModalNewLocation = async () => {
-    console.log("open countries");
     setShowPopup(true);
-    // setSelectedLocation({});
-    // setSelectedBestConnection([]);
+    setSelectedLocation({});
+    setSelectedBestConnection([]);
   };
 
   const closeModal = () => {
@@ -541,7 +559,6 @@ const BestConnection = ({ global: { user } }, data = undefined, onClose) => {
   };
 
   const handleSelectLocation = (location) => {
-
     //  check if location is already selected
     const isExist = selectedCountries.some(
       (item) => item.locationId === location.locationId
@@ -557,8 +574,6 @@ const BestConnection = ({ global: { user } }, data = undefined, onClose) => {
       });
       return;
     }
-
-
 
     setSelectedCountries((prev) => {
       return [...prev, location];
@@ -591,6 +606,13 @@ const BestConnection = ({ global: { user } }, data = undefined, onClose) => {
     setBestConnectionsByRow((prevState) => ({
       ...prevState,
       [locationId]: newConnections,
+    }));
+
+    setNewItem((prev) => ({
+      ...prev,
+      status: true,
+      locationId,
+      newConnections,
     }));
 
     updateBestConnectionToApi(locationId, newConnections);
@@ -631,6 +653,10 @@ const BestConnection = ({ global: { user } }, data = undefined, onClose) => {
       ...prevState,
       [locationId]: value,
     }));
+  };
+
+  const handleSave = () => {
+    setSaveModal(true);
   };
 
   return (
@@ -760,8 +786,8 @@ const BestConnection = ({ global: { user } }, data = undefined, onClose) => {
         <UIButton
           htmlType="submit"
           className="third"
-          disabled={!selectedLocation || !selectedBestConnection}
-          onClick={() => setSaveModal(true)}
+          disabled={!newItem.status && newItem.priority !== ""}
+          onClick={handleSave}
         >
           Save
         </UIButton>
@@ -773,6 +799,7 @@ const BestConnection = ({ global: { user } }, data = undefined, onClose) => {
             <NewLocation
               closeModal={closeModal}
               onSelectLocation={handleSelectLocation}
+              setNewItem={setNewItem}
             />
           </div>
         </div>

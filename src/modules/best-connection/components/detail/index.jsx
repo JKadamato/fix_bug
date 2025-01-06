@@ -16,6 +16,7 @@ export const NewLocation = ({
   user,
   onSelectLocation,
   closeModal,
+  setNewItem,
 }) => {
   const [countries, setCountry] = useState([]);
   const [searchValue, setSearchValue] = useState("");
@@ -80,11 +81,19 @@ export const NewLocation = ({
     const bestConnections = [location];
     const srcImg = item?.iso2;
 
+    onSelectLocation({
+      location,
+      locationId,
+      bestConnections,
+      priority,
+      enabled,
+      srcImg,
+    });
 
-
-
-
-    onSelectLocation({ location, locationId, bestConnections, priority, enabled , srcImg});
+    setNewItem((prev) => ({
+      ...prev,
+      priority: priority,
+    }));
 
     closeModal();
   };
@@ -127,11 +136,17 @@ export const NewLocation = ({
 
         <div className="country-list">
           {filteredCountries?.map((item) => (
-            <div
+            <label
               key={item?.id}
-              className="country-item p-2 border-b cursor-pointer flex items-center"
+              htmlFor={item?.id}
+              className="country-item p-2 border-b cursor-pointer flex items-center hover:bg-[#eaf1f7]"
               onClick={() => handleSelectLocation(item)}
             >
+              <input
+                type="checkbox"
+                className="mr-3 w-[30px] h-[30px]"
+                id={item?.id}
+              />
               <img
                 className="rounded-full mr-2"
                 style={{ border: "2px solid #f5f5f5" }}
@@ -141,7 +156,7 @@ export const NewLocation = ({
                 alt={item?.name}
               />
               <div>{item?.name}</div>
-            </div>
+            </label>
           ))}
         </div>
       </div>
